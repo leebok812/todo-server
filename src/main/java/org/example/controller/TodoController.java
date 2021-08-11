@@ -1,6 +1,7 @@
 package org.example.controller;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.model.TodoEntity;
 import org.example.model.TodoRequest;
 import org.example.model.TodoResponse;
@@ -12,66 +13,65 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RestController
+@Slf4j
 @CrossOrigin
 @AllArgsConstructor
+@RestController
 @RequestMapping("/")
 public class TodoController {
 
-    private final TodoService service;
+    private final TodoService todoService;
 
     @PostMapping
-    public ResponseEntity<TodoResponse> create(@RequestBody TodoRequest request){
-        System.out.println("CREATE");
+    public ResponseEntity<TodoResponse> create(@RequestBody TodoRequest request) {
+        log.info("CREATE");
 
-        if(ObjectUtils.isEmpty(request.getTitle()))
+        if (ObjectUtils.isEmpty(request.getTitle()))
             return ResponseEntity.badRequest().build();
 
-        if(ObjectUtils.isEmpty(request.getOrder()))
-            request.setOrder(0L); // 0L은 default 의미
+        if (ObjectUtils.isEmpty(request.getOrder()))
+            request.setOrder(0L);
 
         if (ObjectUtils.isEmpty(request.getCompleted()))
             request.setCompleted(false);
 
-        TodoEntity result = this.service.add(request);
-
-        return ResponseEntity.ok(new TodoResponse(result));
-    }
-
-    @GetMapping("{id}")
-    public ResponseEntity<TodoResponse> readOne(@PathVariable Long id){ //경로로 받은 값을 주기 위해 @PathVariable씀
-        System.out.println("READ ONE");
-        TodoEntity result = this.service.searchById(id);
+        TodoEntity result = this.todoService.add(request);
         return ResponseEntity.ok(new TodoResponse(result));
     }
 
     @GetMapping
-    public  ResponseEntity<List<TodoResponse>> readAll(){
-        System.out.println("READ ALL");
-        List<TodoEntity> list = this.service.serachAll();
-        List<TodoResponse> response = list.stream().map(TodoResponse::new)
-                                                    .collect(Collectors.toList());
+    public ResponseEntity<List<TodoResponse>> readAll() {
+        log.info("READ ALL");
+        List<TodoEntity> result = this.todoService.searchAll();
+        List<TodoResponse> response = result.stream().map(TodoResponse::new).collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("{id}")
-    public ResponseEntity<TodoResponse> update(@PathVariable Long id, @RequestBody TodoRequest request){
-        System.out.println("UPDATE");
-        TodoEntity result = this.service.updateById(id, request);
+    @GetMapping("{id}")
+    public ResponseEntity<TodoResponse> readOne(@PathVariable Long id) {
+        log.info("READ");
+        TodoEntity result = this.todoService.searchById(id);
         return ResponseEntity.ok(new TodoResponse(result));
     }
 
-    @DeleteMapping("{id}")
-    public ResponseEntity<?> deleteOne(@PathVariable Long id){
-        System.out.println("DELETE");
-        this.service.deleteById(id);
-        return ResponseEntity.ok().build();
+    @PatchMapping("{id}")
+    public ResponseEntity<TodoResponse> update(@PathVariable Long id, @RequestBody TodoRequest request) {
+        log.info("UPDATE");
+        TodoEntity result = this.todoService.updateById(id, request);
+        return ResponseEntity.ok(new TodoResponse(result));
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteAll(){
-        System.out.println("DELETE ALL");
-        this.service.deleteAll();
+    public ResponseEntity<?> deleteAll() {
+        log.info("DELETE ALL");
+        this.todoService.deleteAll();
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<?> deleteOne(@PathVariable Long id) {
+        log.info("DELETE");
+        this.todoService.deleteById(id);
         return ResponseEntity.ok().build();
     }
 }

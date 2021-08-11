@@ -16,7 +16,7 @@ public class TodoEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable =false)
+    @Column(nullable = false)
     private String title;
 
     @Column(name = "todoOrder", nullable = false)
